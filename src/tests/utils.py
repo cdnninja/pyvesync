@@ -20,7 +20,7 @@ from unittest.mock import patch
 from requests.structures import CaseInsensitiveDict
 from pyvesync.vesync import VeSync
 from pyvesync.helpers import Color
-import pyvesync.helpers as vs_helpers
+import pyvesync.vesynconst as const
 
 
 logger = logging.getLogger(__name__)
@@ -160,12 +160,12 @@ def parse_args(mock_api):
 API_DEFAULTS = CaseInsensitiveDict({
     'accountID': Defaults.account_id,
     'token': Defaults.token,
-    'timeZone': vs_helpers.DEFAULT_TZ,
+    'timeZone': const.DEFAULT_TZ,
     'acceptLanguage': 'en',
-    'appVersion': vs_helpers.APP_VERSION,
-    'phoneBrand': vs_helpers.PHONE_BRAND,
-    'phoneOS': vs_helpers.PHONE_OS,
-    'userType': vs_helpers.USER_TYPE,
+    'appVersion': const.APP_VERSION,
+    'phoneBrand': const.PHONE_BRAND,
+    'phoneOS': const.PHONE_OS,
+    'userType': const.USER_TYPE,
     "tk": Defaults.token,
     "traceId": "TRACE_ID",
     'verifyEmail': 'EMAIL',
@@ -378,10 +378,10 @@ class TestBase:
 
 
 def assert_test(test_func, all_kwargs, dev_type=None,
-                 write_api=False, overwrite=False):
+                write_api=False, overwrite=False):
     """Test pyvesync API calls against existing API.
 
-    Set `write_api=True` to True to write API call data to YAML file. 
+    Set `write_api=True` to True to write API call data to YAML file.
     This will not overwrite existing data unless overwrite is True.
     The overwrite argument is only used when API changes, defaults
     to false for development testing. `overwrite=True` and `write_api=True`

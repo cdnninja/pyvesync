@@ -3,7 +3,7 @@
 import logging
 import pytest
 from unittest.mock import patch
-import pyvesync
+from pyvesync import vesynconst as const
 from pyvesync.vesync import VeSync
 from pyvesync.helpers import Helpers as helpers
 
@@ -28,7 +28,7 @@ def test_vesync_init(email, password, timezone, testid):
     if testid == 'full correct':
         assert v_inst.time_zone == timezone
     elif testid in ('invalid tz', 'none tz', 'non tz pass', 'empty tz'):
-        assert v_inst.time_zone == pyvesync.helpers.DEFAULT_TZ
+        assert v_inst.time_zone == const.DEFAULT_TZ
 
 
 login_bad_call = [

@@ -1,8 +1,10 @@
 """VeSync API Device Libary."""
 
+from __future__ import annotations
 import logging
 import re
 import time
+from typing import List, Dict, Optional
 from itertools import chain
 from typing import Tuple
 from pyvesync.helpers import Helpers
@@ -26,7 +28,8 @@ DEFAULT_TZ: str = 'America/New_York'
 DEFAULT_ENER_UP_INT: int = 21600
 
 
-def object_factory(dev_type, config, manager) -> Tuple[str, VeSyncBaseDevice]:
+def object_factory(dev_type: str, config: dict,
+                   manager: 'VeSync') -> Tuple[str, Optional[VeSyncBaseDevice]]:
     """Get device type and instantiate class."""
     def fans(dev_type, config, manager):
         fan_cls = fan_mods.fan_modules[dev_type]  # noqa: F405
@@ -76,8 +79,8 @@ def object_factory(dev_type, config, manager) -> Tuple[str, VeSyncBaseDevice]:
 class VeSync:  # pylint: disable=function-redefined
     """VeSync API functions."""
 
-    def __init__(self, username, password, time_zone=DEFAULT_TZ,
-                 debug=False, redact=True):
+    def __init__(self, username: str, password: str, time_zone: str = DEFAULT_TZ,
+                 debug: bool = False, redact: bool = True) -> None:
         """Initialize VeSync class with username, password and time zone."""
         self.debug = debug
         if debug:  # pragma: no cover
@@ -93,23 +96,24 @@ class VeSync:  # pylint: disable=function-redefined
             self.redact = redact
         self.username = username
         self.password = password
-        self.token = None
-        self.account_id = None
-        self.country_code = None
+        self.token: Optional[str] = None
+        self.account_id: Optional[str] = None
+        self.country_code: Optional[str] = None
         self.devices = None
-        self.enabled = False
+        self.enabled: bool = False
         self.update_interval = API_RATE_LIMIT
-        self.last_update_ts = None
+        self.last_update_ts: Optional[int] = None
         self.in_process = False
         self._energy_update_interval = DEFAULT_ENER_UP_INT
         self._energy_check = True
-        self._dev_list = {}
-        self.outlets = []
-        self.switches = []
-        self.fans = []
-        self.bulbs = []
-        self.scales = []
-        self.kitchen = []
+        self.home_list: List[int] = []
+        self.room_list: Dict[int, str] = {}
+        self.outlets: List[VeSyncBaseDevice] = []
+        self.switches: List[VeSyncBaseDevice] = []
+        self.fans: List[VeSyncBaseDevice] = []
+        self.bulbs: List[VeSyncBaseDevice] = []
+        self.scales: List[VeSyncBaseDevice] = []
+        self.kitchen: List[VeSyncBaseDevice] = []
 
         self._dev_list = {
             'fans': self.fans,
@@ -360,16 +364,16 @@ class VeSync:  # pylint: disable=function-redefined
             for device in chain(*devices):
                 device.update()
 
-            self.last_update_ts = time.time()
+            self.last_update_ts = int(time.time())
 
     def update_energy(self, bypass_check=False) -> None:
         """Fetch updated energy information about devices."""
         if self.outlets:
             for outlet in self.outlets:
-                outlet.update_energy(bypass_check)
+                outlet.update_energy(bypass_check)  # type: ignore[attr-defined]
 
     def update_all_devices(self) -> None:
         """Run get_details() for each device."""
-        devices = list(self._dev_list.keys())
+        devices = list(self._dev_list.values())
         for dev in chain(*devices):
-            dev.get_details()
+            dev.update()

@@ -71,6 +71,10 @@ class VeSyncBaseDevice:
                 Name:{self.device_name}, Device No: {self.sub_device_no},\
                 DevStatus: {self.device_status}, CID: {self.cid}'
 
+    def update(self) -> None:
+        """Update Device Details."""
+        pass
+
     @property
     def is_on(self) -> bool:
         """Return true if device is on."""

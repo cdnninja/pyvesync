@@ -25,7 +25,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: End Users/Desktop',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     keywords=['iot', 'vesync', 'levoit', 'etekcity', 'cosori', 'valceno'],
     packages=find_packages('src', exclude=['tests', 'test*']),
@@ -34,5 +34,5 @@ setup(
     extras_require={
         'dev': ['pytest', 'pytest-cov', 'yaml', 'tox']
     },
-    python_requires='>=3.8',
+    python_requires='>=3.9',
 )
