@@ -1,6 +1,8 @@
 """
 Switch Device API Responses
 
+The dictionary key for each device is the key of the feature_dict in the device module.
+
 SWITCHES variable is a list of device types
 
 DETAILS_RESPONSES variable is a dictionary of responses from the API
@@ -16,7 +18,9 @@ from copy import deepcopy
 from pyvesync import vesyncswitch
 from utils import FunctionResponses, Defaults
 
-SWITCHES = vesyncswitch.switch_modules.keys()
+SWITCHES = [x['model'] for x in vesyncswitch.feature_dict.values()]
+SWITCHES_CONFIG_MODULES = [x['config_modules'][0] for x in vesyncswitch.feature_dict.values()]
+MODEL_CM_DICT = dict(zip(SWITCHES, SWITCHES_CONFIG_MODULES))
 SWITCHES_NUM = len(SWITCHES)
 
 

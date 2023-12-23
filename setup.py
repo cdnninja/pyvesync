@@ -30,7 +30,7 @@ setup(
     keywords=['iot', 'vesync', 'levoit', 'etekcity', 'cosori', 'valceno'],
     packages=find_packages('src', exclude=['tests', 'test*']),
     package_dir={'': 'src'},
-    install_requires=['requests>=2.20.0'],
+    install_requires=['requests>=2.20.0', 'attrs>=19.2.0'],
     extras_require={
         'dev': ['pytest', 'pytest-cov', 'yaml', 'tox']
     },

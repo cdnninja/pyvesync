@@ -1,4 +1,4 @@
-set_brightness:
+get_monthly_energy:
   headers:
     accept-language: en
     accountId: sample_id
@@ -10,20 +10,17 @@ set_brightness:
     acceptLanguage: en
     accountID: sample_id
     appVersion: 2.8.6
-    cid: ESL100CW-CID
-    configModule: WiFi_Bulb_WhiteLightBulb_US
-    jsonCmd:
-      light:
-        brightness: 50
-    method: bypass
+    method: energymonth
+    mobileId: '1234567890123456'
     phoneBrand: SM N9005
     phoneOS: Android
     timeZone: America/New_York
     token: sample_tk
     traceId: TRACE_ID
+    uuid: ESW10-USA-UUID
   method: post
-  url: /cloud/v1/deviceManaged/bypass
-set_color_temp:
+  url: /10a/v1/device/energymonth
+get_weekly_energy:
   headers:
     accept-language: en
     accountId: sample_id
@@ -35,18 +32,38 @@ set_color_temp:
     acceptLanguage: en
     accountID: sample_id
     appVersion: 2.8.6
-    cid: ESL100CW-CID
-    jsonCmd:
-      light:
-        colorTempe: 50
-    method: bypass
+    method: energyweek
+    mobileId: '1234567890123456'
     phoneBrand: SM N9005
     phoneOS: Android
     timeZone: America/New_York
     token: sample_tk
     traceId: TRACE_ID
+    uuid: ESW10-USA-UUID
   method: post
-  url: /cloud/v1/deviceManaged/bypass
+  url: /10a/v1/device/energyweek
+get_yearly_energy:
+  headers:
+    accept-language: en
+    accountId: sample_id
+    appVersion: 2.8.6
+    content-type: application/json
+    tk: sample_tk
+    tz: America/New_York
+  json_object:
+    acceptLanguage: en
+    accountID: sample_id
+    appVersion: 2.8.6
+    method: energyyear
+    mobileId: '1234567890123456'
+    phoneBrand: SM N9005
+    phoneOS: Android
+    timeZone: America/New_York
+    token: sample_tk
+    traceId: TRACE_ID
+    uuid: ESW10-USA-UUID
+  method: post
+  url: /10a/v1/device/energyyear
 turn_off:
   headers:
     accept-language: en
@@ -58,20 +75,12 @@ turn_off:
   json_object:
     acceptLanguage: en
     accountID: sample_id
-    appVersion: 2.8.6
-    cid: ESL100CW-CID
-    configModule: WiFi_Bulb_WhiteLightBulb_US
-    jsonCmd:
-      light:
-        action: 'off'
-    method: bypass
-    phoneBrand: SM N9005
-    phoneOS: Android
+    status: 'off'
     timeZone: America/New_York
     token: sample_tk
-    traceId: TRACE_ID
-  method: post
-  url: /cloud/v1/deviceManaged/bypass
+    uuid: ESW10-USA-UUID
+  method: put
+  url: /10a/v1/device/devicestatus
 turn_on:
   headers:
     accept-language: en
@@ -83,20 +92,12 @@ turn_on:
   json_object:
     acceptLanguage: en
     accountID: sample_id
-    appVersion: 2.8.6
-    cid: ESL100CW-CID
-    configModule: WiFi_Bulb_WhiteLightBulb_US
-    jsonCmd:
-      light:
-        action: 'on'
-    method: bypass
-    phoneBrand: SM N9005
-    phoneOS: Android
+    status: 'on'
     timeZone: America/New_York
     token: sample_tk
-    traceId: TRACE_ID
-  method: post
-  url: /cloud/v1/deviceManaged/bypass
+    uuid: ESW10-USA-UUID
+  method: put
+  url: /10a/v1/device/devicestatus
 update:
   headers:
     accept-language: en
@@ -109,15 +110,13 @@ update:
     acceptLanguage: en
     accountID: sample_id
     appVersion: 2.8.6
-    cid: ESL100CW-CID
-    configModule: WiFi_Bulb_WhiteLightBulb_US
-    jsonCmd:
-      getLightStatus: get
-    method: bypass
+    method: devicedetail
+    mobileId: '1234567890123456'
     phoneBrand: SM N9005
     phoneOS: Android
     timeZone: America/New_York
     token: sample_tk
     traceId: TRACE_ID
+    uuid: ESW10-USA-UUID
   method: post
-  url: /cloud/v1/deviceManaged/bypass
+  url: /10a/v1/device/devicedetail

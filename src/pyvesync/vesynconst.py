@@ -1,5 +1,6 @@
 """Constats for the PyVeSync package."""
 
+
 API_BASE_URL = 'https://smartapi.vesync.com'
 API_RATE_LIMIT = 30
 # If device is out of reach, the cloud api sends a timeout response after 7 seconds,
@@ -17,3 +18,6 @@ PHONE_OS = 'Android'
 MOBILE_ID = '1234567890123456'
 USER_TYPE = '1'
 BYPASS_APP_V = "VeSync 3.0.51"
+CLIENT_TYPE = 'vesyncApp'
+CLIENT_INFO = 'iOS 15.5.0'
+CLIENT_VERSION = "5.0.20"

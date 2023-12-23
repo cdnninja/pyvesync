@@ -40,9 +40,9 @@ logger.setLevel(logging.DEBUG)
 
 OUTLET_DEV_TYPES = call_json_outlets.OUTLETS
 POWER_METHODS = ['get_energy_update']
-OUTLET_PARAMS = []
-[OUTLET_PARAMS.append([dev, method]
-                      ) for dev in OUTLET_DEV_TYPES for method in POWER_METHODS]
+OUTLET_PARAMS = [[dev, method] for dev in OUTLET_DEV_TYPES for method in POWER_METHODS]
+
+CONFIG_MODULES = call_json.CONFIG_MODULE_DICT
 
 
 class TestOutlets(TestBase):
@@ -122,14 +122,16 @@ class TestOutlets(TestBase):
         The device is instantiated using the `call_json.DeviceList.device_list_item()`
         method. The device details contain the default values set in `utils.Defaults`
         """
+        # Set self.write_api to True to write device call
+        # self.write_api = True
+        # self.overwrite = True
+
         # Set return value for call_api based on call_json_bulb.DETAILS_RESPONSES
         self.mock_api.return_value = call_json_outlets.DETAILS_RESPONSES[dev_type]
 
         # Instantiate device from device list return item
         device_config = call_json.DeviceList.device_list_item(dev_type)
-        _, outlet_obj = object_factory(dev_type,
-                                       device_config,
-                                       self.manager)
+        _, outlet_obj = object_factory(device_config, self.manager)
 
         # Get and run method from object
         method_call = getattr(outlet_obj, method)
@@ -138,6 +140,8 @@ class TestOutlets(TestBase):
         # Parse mock_api args tuple from arg, kwargs to kwargs
         all_kwargs = parse_args(self.mock_api)
 
+        if self.build:
+            assert (self.overwrite is False) and (self.write_api is False)
         # Assert request matches recored request or write new records
         assert_test(method_call, all_kwargs, dev_type,
                     self.write_api, self.overwrite)
@@ -180,6 +184,7 @@ class TestOutlets(TestBase):
 
         """
         # Get method name and kwargs from method fixture
+        # self.write_api = True
         method_name = method[0]
         if len(method) == 2 and isinstance(method[1], dict):
             method_kwargs = method[1]
@@ -200,9 +205,7 @@ class TestOutlets(TestBase):
         device_config = call_json.DeviceList.device_list_item(dev_type)
 
         # Instantiate device from device list return item
-        _, outlet_obj = object_factory(dev_type,
-                                       device_config,
-                                       self.manager)
+        _, outlet_obj = object_factory(device_config, self.manager)
 
         # Ensure method runs based on device configuration
         if method[0] == 'turn_on':
@@ -222,6 +225,8 @@ class TestOutlets(TestBase):
         # Parse arguments from mock_api call into a dictionary
         all_kwargs = parse_args(self.mock_api)
 
+        if self.build:
+            assert (self.overwrite is False) and (self.write_api is False)
         # Assert request matches recored request or write new records
         assert_test(method_call, all_kwargs, dev_type,
                     self.write_api, self.overwrite)
@@ -245,7 +250,7 @@ class TestOutlets(TestBase):
         """Test outlets power history methods."""
         self.mock_api.return_value = call_json_outlets.ENERGY_HISTORY
         device_config = call_json.DeviceList.device_list_item(dev_type)
-        _, outlet_obj = object_factory(dev_type, device_config, self.manager)
+        _, outlet_obj = object_factory(device_config, self.manager)
         outlet_obj.update_energy()
         assert self.mock_api.call_count == 3
         assert list(outlet_obj.energy.keys()) == ['week', 'month', 'year']

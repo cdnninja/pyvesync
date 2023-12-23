@@ -624,7 +624,6 @@ They can be set through the `VeSyncAirFryer158.fryer_status` dataclass but shoul
 
 `VeSyncAirFryer158.end()` - End cooking or preheating and return air fryer to `standby` state
 
-
 ### Timer DataClass
 
 This is the a Timer DataClass that is used in the  `get_timer()` or `set_timer()` methods *only implemented for Levoit Core 200S and 300S Air Purifier*, will eventually integrate with remaining devices. This object is created when the device timer methods are called. **The `pause()`, `resume()` and `stop()` methods for this DataClass only impact the timer locally and do not update the API.**
@@ -659,7 +658,6 @@ timer.end()
 # Resume timer - Does not update API - only Resumes locally
 timer.start()
 ```
-
 
 ### JSON Output API
 
@@ -948,7 +946,7 @@ def test_device():
             fan = dev
             break
 
-    if fan == None:
+    if fan is None:
         logger.debug("Device not found")
         logger.debug("Devices found - \n %s", str(manager._dev_list))
         return
@@ -1001,7 +999,9 @@ if __name__ == "__main__":
 
 ## Device Requests
 
-SSL pinning makes capturing packets much harder. In order to be able to capture packets, SSL pinning needs to be disabled before running an SSL proxy. Use an Android emulator such as Android Studio, which is available for Windows and Linux for free. Download the APK from APKPure or a similiar site and use [Objection](https://github.com/sensepost/objection) or [Frida](https://frida.re/docs/gadget/). Followed by capturing the packets with Charles Proxy or another SSL proxy application.
+If you would like to add your device please first post the debug results of the API call. Now the VeSync object automatically finds the device details from the API and logs the results with `debug=True`. Please post the device information when making a request.
+
+Packet captures are needed to add devices. SSL pinning makes capturing packets much harder. In order to be able to capture packets, SSL pinning needs to be disabled before running an SSL proxy. Use an Android emulator such as Android Studio, which is available for Windows and Linux. Download the APK from APKPure or a similiar site and use [Objection](https://github.com/sensepost/objection) or [Frida](https://frida.re/docs/gadget/). Followed by capturing the packets with Charles Proxy or another SSL proxy application. Note that you must patch the APK to use the installed SSL certificate, in addition to running frida-server on the emulator.
 
 Be sure to capture all packets from the device list and each of the possible device menus and actions. Please redact the `accountid` and `token` from the captured packets. If you feel you must redact other keys, please do not delete them entirely. Replace letters with "A" and numbers with "1", leave all punctuation intact and maintain length.
 
@@ -1027,7 +1027,7 @@ After:
 }
 ```
 
-# Contributing
+## Contributing
 
 All [contributions](CONTRIBUTING.md) are welcome.
 

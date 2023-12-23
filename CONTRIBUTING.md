@@ -48,7 +48,7 @@ tox -e lint # flake8 & pydocstrings
 tox -e mypy # type checkings
 ```
 
-Tests are run based off of the API calls recorded in the [api](src/tests/api) directory. Please read the [Test Readme](src/tests/README.md) for further details on the structure of the tests. 
+Tests are run based off of the API calls recorded in the [api](src/tests/api) directory. Please read the [Test Readme](src/tests/README.md) for further details on the structure of the tests.
 
 
 # Ensure new devices are Integrated in Tests
@@ -77,12 +77,4 @@ If developing a new device and it is completed and thoroughly tested, pass the `
 pytest --write_api
 
 tox -e testenv -- --write_api
-```
-
-If fixing an existing device where the API call was incorrect or the api has changed, pass `--write_api` and `overwrite` to pytest. Both arguments need to be provided to overwrite existing API data already in the YAML files.
-
-```bash
-pytest --write_api --overwrite
-
-tox -e testenv -- --write_api --overwrite
 ```

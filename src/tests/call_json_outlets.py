@@ -1,6 +1,8 @@
 """
 Outlet Device API Responses
 
+The dictionary key for each device is the key of the feature_dict in the device module.
+
 OUTLET variable is a list of device types
 
 DETAILS_RESPONSES variable is a dictionary of responses from the API
@@ -39,7 +41,9 @@ from copy import deepcopy
 from utils import FunctionResponses, Defaults
 from pyvesync import vesyncoutlet
 
-OUTLETS = vesyncoutlet.outlet_modules.keys()
+OUTLETS = [x['model'] for x in vesyncoutlet.outlet_config.values()]
+OUTLETS_CONFIG_MODULES = [x['config_modules'][0] for x in vesyncoutlet.outlet_config.values()]
+MODEL_CM_DICT = dict(zip(OUTLETS, OUTLETS_CONFIG_MODULES))
 OUTLETS_NUM = len(OUTLETS)
 
 # OUTLETS = ['wifi-switch-1.3', 'ESW03-USA', 'ESW01-EU', 'ESW15-USA', 'ESO15-TB']
@@ -132,6 +136,7 @@ class OutletDetails:
 
 DETAILS_RESPONSES = {
     'wifi-switch-1.3': OutletDetails.details_7a,
+    'ESW10-USA': OutletDetails.details_10a,
     'ESW03-USA': OutletDetails.details_10a,
     'ESW01-EU': OutletDetails.details_10a,
     'ESW15-USA': OutletDetails.details_15a,

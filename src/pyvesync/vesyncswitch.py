@@ -4,29 +4,34 @@ import logging
 import json
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Union, Optional
-
 from pyvesync.helpers import Helpers as helpers
 from pyvesync.vesyncbasedevice import VeSyncBaseDevice
+from pyvesync.devhelpers import DeviceConfig
 
 logger = logging.getLogger(__name__)
 
 feature_dict: Dict[str, Dict[str, Union[list, str]]] = {
     'ESWL01': {
+        'model': 'ESWL01',
+        'config_modules': ['InwallswitchUS'],
         'module': 'VeSyncWallSwitch',
         'features': []
     },
     'ESWD16': {
+        'model': 'ESWD16',
+        'config_modules': ['WifiWallDimmer'],
         'module': 'VeSyncDimmerSwitch',
         'features': ['dimmable']
     },
     'ESWL03': {
+        'model': 'ESWL03',
+        'config_modules': ['InwallSwitch3way'],
         'module': 'VeSyncWallSwitch',
         'features': []
     }
 }
 
-switch_modules: dict = {k: v['module']
-                        for k, v in feature_dict.items()}
+switch_modules: dict = DeviceConfig.model_dict(feature_dict)
 
 __all__: list = list(switch_modules.values()) + ['switch_modules']
 

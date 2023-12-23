@@ -7,23 +7,39 @@ from abc import ABCMeta, abstractmethod
 
 from pyvesync.helpers import Helpers
 from pyvesync.vesyncbasedevice import VeSyncBaseDevice
+from pyvesync.devhelpers import DeviceConfig
 
 logger = logging.getLogger(__name__)
 
 outlet_config = {
     'wifi-switch-1.3': {
+        'model': 'wifi-switch-1.3',
+        'config_modules': ["7AOutlet"],
         'module': 'VeSyncOutlet7A'},
-    'ESW03-USA': {
+    "ESW03-USA": {
+        'model': 'ESW03-USA',
+        'config_modules': ["10AOutletUSA"],
+        'module': 'VeSyncOutlet10A',
+    },
+    'ESW10-USA': {
+        'model': 'ESW10-USA',
+        'config_modules': ["WiFi_Outlet_ESW10-USA"],
         'module': 'VeSyncOutlet10A'},
     'ESW01-EU': {
+        'model': 'ESW01-EU',
+        'config_modules': ["10AOutletEU"],
         'module': 'VeSyncOutlet10A'},
     'ESW15-USA': {
+        'model': 'ESW15-USA',
+        'config_modules': ["15AOutletNightlight"],
         'module': 'VeSyncOutlet15A'},
     'ESO15-TB': {
+        'model': 'ESO15-TB',
+        'config_modules': ["OutdoorSocket15A"],
         'module': 'VeSyncOutdoorPlug'},
 }
 
-outlet_modules = {k: v['module'] for k, v in outlet_config.items()}
+outlet_modules = DeviceConfig.model_dict(outlet_config)
 
 __all__ = list(outlet_modules.values()) + ['outlet_modules']
 

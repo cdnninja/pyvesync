@@ -62,6 +62,10 @@ FANS = call_json_fans.FANS
 OUTLETS = call_json_outlets.OUTLETS
 SWITCHES = call_json_switches.SWITCHES
 
+CONFIG_MODULE_DICT = call_json_bulbs.MODEL_CM_DICT | \
+    call_json_fans.MODEL_CM_DICT | \
+    call_json_outlets.MODEL_CM_DICT | \
+    call_json_switches.MODEL_CM_DICT
 
 DEFAULT_HEADER = {
     'accept-language': 'en',
@@ -78,7 +82,7 @@ DEFAULT_HEADER_BYPASS = {
 }
 
 
-def BYPASS_V1_BODY(cid: str, config_module: str, json_cmd: dict):
+def BYPASS_V1_BODY(cid: str, config_module: str, json_cmd: dict):  # noqa: N802
     return {
         "traceId": Defaults.trace_id,
         "method": "bypass",
@@ -165,14 +169,13 @@ class DeviceList:
         'connectionType': 'wifi',
         'mode': None,
         'speed': None,
-        'deviceProps': None,
-        'configModule': 'ConfigModule',
+        'deviceProps': None
     }
 
-    bulbs = dict.fromkeys(call_json_bulbs.BULBS, "wifi-light")
-    outlets = dict.fromkeys(call_json_outlets.OUTLETS, "wifi-switch")
-    fans = dict.fromkeys(call_json_fans.FANS, "wifi-air")
-    switches = dict.fromkeys(call_json_switches.SWITCHES, "Switches")
+    bulbs = dict.fromkeys(BULBS, "wifi-light")
+    outlets = dict.fromkeys(OUTLETS, "wifi-switch")
+    fans = dict.fromkeys(FANS, "wifi-air")
+    switches = dict.fromkeys(SWITCHES, "Switches")
 
     @classmethod
     def device_list_item(cls, model, sub_device_no=0):
@@ -186,6 +189,7 @@ class DeviceList:
         model_dict['cid'] = Defaults.cid(model)
         model_dict['uuid'] = Defaults.uuid(model)
         model_dict['macID'] = Defaults.macid(model)
+        model_dict['configModule'] = CONFIG_MODULE_DICT[model]
         if model == 'ESO15-TB':
             model_dict['subDeviceNo'] = 1
         return model_dict
@@ -533,7 +537,7 @@ class DeviceList:
     ]
 
     @classmethod
-    def DEVICE_LIST_RETURN(cls, dev_conf: dict) -> tuple:
+    def DEVICE_LIST_RETURN(cls, dev_conf: dict) -> tuple:  # noqa: N802
         """Test the fan."""
         return (
             {

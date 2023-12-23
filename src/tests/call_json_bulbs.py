@@ -1,7 +1,9 @@
 """
 Light Bulbs Device API Responses
 
-OUTLET variable is a list of device types
+OUTLET variable is a list of device types.
+
+**The dictionary key for each device is the key of the feature_dict in the device module.**
 
 DETAILS_RESPONSES variable is a dictionary of responses from the API
 for get_details() methods.  The keys are the device types and the
@@ -35,11 +37,14 @@ METHOD_RESPONSES['XYD0001'].default_factory = lambda: ({"code": 0, "msg": "succe
 """
 from copy import deepcopy
 from utils import FunctionResponses, Defaults
-from pyvesync.vesyncbulb import bulb_modules
+from pyvesync import vesyncbulb
 TRACE_ID = "TRACE_ID"
 
 # BULBS = ['ESL100', 'ESL100CW', 'ESL100MC', 'XYD0001']
-BULBS = bulb_modules.keys()
+BULBS = [x['model'] for x in vesyncbulb.feature_dict.values()]
+BULBS_CONFIG_MODULES = [x['config_modules'][0] for x in vesyncbulb.feature_dict.values()]
+MODEL_CM_DICT = dict(zip(BULBS, BULBS_CONFIG_MODULES))
+
 BULBS_NUM = len(BULBS)
 
 

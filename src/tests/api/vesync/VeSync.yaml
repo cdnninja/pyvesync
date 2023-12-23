@@ -19,15 +19,19 @@ get_devices:
 login:
   json_object:
     acceptLanguage: en
+    accountId: sample_id
     appVersion: 2.8.6
+    debugMode: false
     devToken: ''
     email: EMAIL
-    method: login
+    method: loginV2
     password: PASSWORD
     phoneBrand: SM N9005
     phoneOS: Android
     timeZone: America/New_York
+    token: sample_tk
     traceId: TRACE_ID
+    userCountryCode: ''
     userType: '1'
   method: post
-  url: /cloud/v1/user/login
+  url: /cloud/v2/user/loginV2

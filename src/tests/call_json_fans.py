@@ -1,7 +1,9 @@
 """
 Air Purifier and Humidifier Device API Responses
 
-FANS variable is a list of device types
+The dictionary key for each device is the key of the feature_dict in the device module.
+
+FANS variable is a list of device types.
 
 DETAILS_RESPONSES variable is a dictionary of responses from the API
 for get_details() methods.  The keys are the device types and the
@@ -33,16 +35,18 @@ METHOD_RESPONSES['DEV_TYPE']['set_status'] = status_response
 METHOD_RESPONSES['DEVTYPE'].default_factory = lambda: ({"code": 0, "msg": "success"}, 200)
 """
 from copy import deepcopy
-from pyvesync import vesyncfan, helpers
+from pyvesync import vesyncfan, devhelpers
 from utils import Defaults, FunctionResponses
 
-HUMID_MODELS = []
-for model_type, model_dict in vesyncfan.humid_features.items():
-    HUMID_MODELS.append(model_dict['models'][0])
+HUMID_MODELS = [x['model'] for x in vesyncfan.humid_features.values()]
 
-AIR_MODELS = []
-for model_type, model_dict in vesyncfan.air_features.items():
-    AIR_MODELS.append(model_dict['models'][0])
+AIR_MODELS = [x['model'] for x in vesyncfan.air_features.values()]
+
+HUMID_CONFIG_MODULES = [x['config_modules'][0] for x in vesyncfan.humid_features.values()]
+
+AIR_CONFIG_MODULES = [x['config_modules'][0] for x in vesyncfan.air_features.values()]
+
+MODEL_CM_DICT = dict(zip(HUMID_MODELS + AIR_MODELS, HUMID_CONFIG_MODULES + AIR_CONFIG_MODULES))
 
 FANS = HUMID_MODELS + AIR_MODELS
 FANS_NUM = len(FANS)
@@ -306,4 +310,4 @@ for k in AIR_MODELS:
                                                       'remain': 100,
                                                       'total': 100,
                                                       'action': 'off'}), 200)
-FAN_TIMER = helpers.Timer(100, 'off')
+FAN_TIMER = devhelpers.Timer(100, 'off')

@@ -18,6 +18,7 @@ from pyvesync.vesynconst import (
     MOBILE_ID,
     USER_TYPE,
     DEFAULT_REGION,
+
 )
 
 logger = logging.getLogger(__name__)
@@ -84,8 +85,12 @@ class Helpers:
             body['email'] = manager.username
             body['password'] = cls.hash_password(manager.password)
             body['devToken'] = ''
+            body['token'] = ''
+            body['accountId'] = ''
             body['userType'] = USER_TYPE
-            body['method'] = 'login'
+            body['method'] = 'loginV2'
+            body['userCountryCode'] = ''
+            body['debugMode'] = False
             return body
 
         body |= cls.req_body_auth(manager)
@@ -422,7 +427,7 @@ class Color:
 
 
 @dataclass
-class Timer:
+class TimerDC:
     """Dataclass for timers.
 
     Parameters

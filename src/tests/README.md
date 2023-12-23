@@ -29,7 +29,27 @@ pytest
 tox -e testenv # you can also use the environments lint, pylint, mypy
 ```
 
-If developing a new device and it is completed and thoroughly tested, pass the `--write_api` to pytest. Be sure to include the `--` before the argument in the tox command.
+If you would like to run a single test, use the pytest test id argument. For the parametrized test, the correct test id for the parameter must be used. If using visual studio code, the test ID's for each test are shown in the testing tab.
+
+```shell
+pytest test_file.py::TestClass::test_method["parameter id"]
+```
+
+The test id is in the format of 'device.device_type.["'method', 'argument'"]
+
+Turning on the ES10-USA outlet:
+
+```shell
+pytest src/tests/test_outlets.py::TestOutlets::test_methods["outlets.ESW10-USA.['turn_on']"]
+```
+
+Testing the method for setting the mist level of the Classic300S Humidifer:
+
+```bash
+pytest src/tests/test_fans.py::TestHumidifiers::test_methods["humidifiers.Classic300S.['set_mist_level', {'level': 2}]"]
+```
+
+If developing a new device and it is completed and thoroughly tested, pass the `--write_api` to pytest. Be sure to include the `--` before the argument in the tox command. You can also set `self.write_api = True` in the test method. This will only write API's that have not already been defined in the YAML test files. *Switch back to False before requesting a PR or the build with fail*
 
 ```bash
 pytest --write_api
@@ -37,12 +57,19 @@ pytest --write_api
 tox -e testenv -- --write_api
 ```
 
-If fixing an existing device where the API call was incorrect or the api has changed, pass `--write_api` and `overwrite` to pytest. Both arguments need to be provided to overwrite existing API data already in the YAML files.
+If fixing an existing device where the API call was incorrect or the api has changed, set `self.overwrite = True` and `self.write_api = True` in the test method. Both variables need to be set to overwrite existing API data already in the YAML files. Call the specific test you would like to run from the command line as per the instructions above. *Switch back to False before requesting a PR or the build with fail*
 
-```bash
-pytest --write_api --overwrite
+**test_outlets.py:**
 
-tox -e testenv -- --write_api --overwrite
+```python
+
+class TestOutlets(TestBase):
+
+    def test_details(self, dev_type, method):
+
+        self.write_api = True
+        self.overwrite = True
+
 ```
 
 ## Testing Process
@@ -78,13 +105,13 @@ The `DETAILS_RESPONSES` dictionary contains the device type as the key and refer
 The responses for device methods are also defined in the `call_json_DEVICE` module. The METHOD_RESPONSES dictionary uses a defaultdict imported from `utils.py` with a simple `{"code": 0, "message": ""}` as the default value. The `METHOD_RESPONSES` dictionary is created with keys of device type and values as the defaultdict object. From here the method responses can be added to the defaultdict object for specific scenarios.
 
 ```python
-from utils import FunctionResponses 
+from utils import FunctionResponses
 from copy import deepcopy
 
 device_types = ['dev1', 'dev2']
 
 # defaultdict with default value - ({"code": 0, "msg": None}, 200)
-method_response = FunctionResponses 
+method_response = FunctionResponses
 
 # Use deepcopy to build the device response dictionary used to test the get_details() method
 device_responses = {dev_type: deepcopy(method_response) for dev_type in device_types}

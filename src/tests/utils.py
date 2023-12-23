@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 import pytest
 import yaml
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from unittest.mock import patch
 from requests.structures import CaseInsensitiveDict
 from pyvesync.vesync import VeSync
@@ -30,6 +30,7 @@ FunctionResponses: defaultdict = defaultdict(lambda: ({"code": 0, "msg": None}, 
 CALL_API_ARGS = ['url', 'method', 'data', 'headers']
 
 ID_KEYS = ['CID', 'UUID', 'MACID']
+
 
 class Defaults:
     """General defaults for API responses and requests.
@@ -348,6 +349,7 @@ class TestBase:
     """
     overwrite = False
     write_api = False
+    build = False
 
     @pytest.fixture(autouse=True, scope='function')
     def setup(self, caplog):

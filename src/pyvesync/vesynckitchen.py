@@ -6,7 +6,9 @@ from functools import wraps
 from typing import Optional, Union, Set
 from dataclasses import dataclass
 from pyvesync.vesyncbasedevice import VeSyncBaseDevice
-from pyvesync.helpers import Helpers as helpers
+from pyvesync.helpers import Helpers
+from pyvesync.devhelpers import DeviceConfig
+
 
 logger = logging.getLogger(__name__)
 
@@ -14,25 +16,22 @@ logger = logging.getLogger(__name__)
 kitchen_features: dict = {
     'Cosori3758L': {
         'module': 'VeSyncAirFryer158',
-        'models': ['CS137-AF/CS158-AF', 'CS158-AF', 'CS137-AF', 'CS358-AF'],
+        'model': 'Cosori3758L',
+        'config_modules': [
+            "WiFi_SKA_AirFryer137_US",
+            "WiFi_AirFryer_CS158-AF_EU",
+            "WiFiBTOnboarding_AirFryer_CS358-AF_US",
+            "WFBO_AFR_CS358-AF_EU"
+        ],
         'features': [],
     }
 }
 
 
-def model_dict() -> dict:
-    """Build purifier and humidifier model dictionary."""
-    model_modules = {}
-    for dev_dict in kitchen_features.values():
-        for model in dev_dict['models']:
-            model_modules[model] = dev_dict['module']
-    return model_modules
-
-
 def model_features(dev_type: str) -> dict:
     """Get features from device type."""
     for dev_dict in kitchen_features.values():
-        if dev_type in dev_dict['models']:
+        if dev_type in dev_dict['config_modules']:
             return dev_dict
     raise ValueError('Device not configured')
 
@@ -40,7 +39,7 @@ def model_features(dev_type: str) -> dict:
 kitchen_classes: Set[str] = {v['module'] for k, v in kitchen_features.items()}
 
 
-kitchen_modules: dict = model_dict()
+kitchen_modules: dict = DeviceConfig.model_dict(kitchen_features)
 
 
 __all__ = list(kitchen_classes)
@@ -129,8 +128,8 @@ class FryerStatus:
                 return 0
             return int(self.preheat_last_time // 60)
         if self.preheat_last_time is not None and self.last_timestamp is not None:
-            return int(max((self.preheat_last_time -
-                            (int(time.time()) - self.last_timestamp)) // 60, 0))
+            return int(max((self.preheat_last_time - (
+                int(time.time()) - self.last_timestamp)) // 60, 0))
         return 0
 
     @property
@@ -143,8 +142,8 @@ class FryerStatus:
                 return 0
             return int(max(self.cook_last_time // 60, 0))
         if self.cook_last_time is not None and self.last_timestamp is not None:
-            return int(max((self.cook_last_time -
-                            (int(time.time()) - self.last_timestamp)) // 60, 0))
+            return int(max((self.cook_last_time - (
+                int(time.time()) - self.last_timestamp)) // 60, 0))
         return 0
 
     @property
@@ -283,12 +282,13 @@ class VeSyncAirFryer158(VeSyncBaseDevice):
         self.fryer_status.temp_unit = self.get_temp_unit()
         self.ready_start = self.get_remote_cook_mode()
         self.last_update = int(time.time())
+        self.features = DeviceConfig.get_features(self.config_module, kitchen_features)
         self.refresh_interval = 0
 
-    def get_body(self, method:  Optional[str] = None) -> dict:
+    def get_body(self, method: Optional[str] = None) -> dict:
         """Return body of api calls."""
         body = {
-            **helpers.req_body(self.manager, 'bypass'),
+            **Helpers.req_body(self.manager, 'bypass'),
             'cid': self.cid,
             'userCountryCode': self.manager.country_code,
             'debugMode': False
@@ -306,15 +306,14 @@ class VeSyncAirFryer158(VeSyncBaseDevice):
             'jsonCmd': cmd_dict,
             'pid': self.pid,
             'accountID': self.manager.account_id
-            }
-        )
+        })
         return body
 
     def get_temp_unit(self):
         """Get Air Fryer Configuration."""
         body = self.get_body('configurationsV2')
 
-        r, _ = helpers.call_api('/cloud/v2/deviceManaged/configurationsV2', 'post',
+        r, _ = Helpers.call_api('/cloud/v2/deviceManaged/configurationsV2', 'post',
                                 json_object=body)
         if not isinstance(r, dict) or r.get('code') != 0 \
                 or not isinstance(r.get('result'), dict):
@@ -327,7 +326,7 @@ class VeSyncAirFryer158(VeSyncBaseDevice):
     def get_remote_cook_mode(self):
         """Get the cook mode."""
         body = self.get_body('getRemoteCookMode158')
-        r, _ = helpers.call_api('/cloud/v1/deviceManaged/getRemoteCookMode158',
+        r, _ = Helpers.call_api('/cloud/v1/deviceManaged/getRemoteCookMode158',
                                 'post',
                                 json_object=body)
         if not isinstance(r, dict) or r.get('code') != 0 \
@@ -409,7 +408,7 @@ class VeSyncAirFryer158(VeSyncBaseDevice):
         cmd = {'getStatus': 'status'}
         req_body = self.get_status_body(cmd)
         url = '/cloud/v1/deviceManaged/bypass'
-        resp, _ = helpers.call_api(url, 'post', json_object=req_body)
+        resp, _ = Helpers.call_api(url, 'post', json_object=req_body)
 
         if resp is None:
             logger.debug('Failed to get details for %s', self.device_name)
@@ -613,7 +612,7 @@ class VeSyncAirFryer158(VeSyncBaseDevice):
         """Set API status with jsonCmd."""
         body = self.get_status_body(json_cmd)
         url = '/cloud/v1/deviceManaged/bypass'
-        resp, _ = helpers.call_api(url, 'post', json_object=body)
+        resp, _ = Helpers.call_api(url, 'post', json_object=body)
         if resp is None:
             logger.debug('Failed to set status for %s - No response from API',
                          self.device_name)

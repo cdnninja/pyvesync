@@ -7,8 +7,8 @@ change_fan_speed:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LAP-V201S-AASR-CID
-    configModel: ConfigModule
-    configModule: ConfigModule
+    configModel: VS_WFON_APR_LAP-V201S-AEUR_OFL_EU
+    configModule: VS_WFON_APR_LAP-V201S-AEUR_OFL_EU
     debugMode: false
     deviceId: LAP-V201S-AASR-CID
     deviceRegion: US
@@ -36,8 +36,8 @@ manual_mode:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LAP-V201S-AASR-CID
-    configModel: ConfigModule
-    configModule: ConfigModule
+    configModel: VS_WFON_APR_LAP-V201S-AEUR_OFL_EU
+    configModule: VS_WFON_APR_LAP-V201S-AEUR_OFL_EU
     debugMode: false
     deviceId: LAP-V201S-AASR-CID
     deviceRegion: US
@@ -65,8 +65,8 @@ sleep_mode:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LAP-V201S-AASR-CID
-    configModel: ConfigModule
-    configModule: ConfigModule
+    configModel: VS_WFON_APR_LAP-V201S-AEUR_OFL_EU
+    configModule: VS_WFON_APR_LAP-V201S-AEUR_OFL_EU
     debugMode: false
     deviceId: LAP-V201S-AASR-CID
     deviceRegion: US
@@ -92,8 +92,8 @@ turn_off:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LAP-V201S-AASR-CID
-    configModel: ConfigModule
-    configModule: ConfigModule
+    configModel: VS_WFON_APR_LAP-V201S-AEUR_OFL_EU
+    configModule: VS_WFON_APR_LAP-V201S-AEUR_OFL_EU
     debugMode: false
     deviceId: LAP-V201S-AASR-CID
     deviceRegion: US
@@ -120,8 +120,8 @@ turn_on:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LAP-V201S-AASR-CID
-    configModel: ConfigModule
-    configModule: ConfigModule
+    configModel: VS_WFON_APR_LAP-V201S-AEUR_OFL_EU
+    configModule: VS_WFON_APR_LAP-V201S-AEUR_OFL_EU
     debugMode: false
     deviceId: LAP-V201S-AASR-CID
     deviceRegion: US
@@ -148,8 +148,8 @@ update:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LAP-V201S-AASR-CID
-    configModel: ConfigModule
-    configModule: ConfigModule
+    configModel: VS_WFON_APR_LAP-V201S-AEUR_OFL_EU
+    configModule: VS_WFON_APR_LAP-V201S-AEUR_OFL_EU
     debugMode: false
     deviceId: LAP-V201S-AASR-CID
     deviceRegion: US

@@ -9,6 +9,7 @@ def pytest_addoption(parser):
           help="overwrite existing API in yaml - WARNING do not use unless absolutely necessary"
     )
 
+
 def pytest_generate_tests(metafunc):
     if metafunc.cls is None or 'test_x' in metafunc.module.__name__:
         return

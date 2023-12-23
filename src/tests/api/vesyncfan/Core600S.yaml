@@ -7,7 +7,7 @@ auto_mode:
     accountID: sample_id
     appVersion: 2.8.6
     cid: Core600S-CID
-    configModule: ConfigModule
+    configModule: WFON_APR_LAP-C601S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -32,7 +32,7 @@ change_fan_speed:
     accountID: sample_id
     appVersion: 2.8.6
     cid: Core600S-CID
-    configModule: ConfigModule
+    configModule: WFON_APR_LAP-C601S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -60,7 +60,7 @@ clear_timer:
     accountID: sample_id
     appVersion: 2.8.6
     cid: Core600S-CID
-    configModule: ConfigModule
+    configModule: WFON_APR_LAP-C601S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -84,7 +84,7 @@ manual_mode:
     accountID: sample_id
     appVersion: 2.8.6
     cid: Core600S-CID
-    configModule: ConfigModule
+    configModule: WFON_APR_LAP-C601S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -111,7 +111,7 @@ set_timer:
     accountID: sample_id
     appVersion: 2.8.6
     cid: Core600S-CID
-    configModule: ConfigModule
+    configModule: WFON_APR_LAP-C601S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -137,7 +137,7 @@ sleep_mode:
     accountID: sample_id
     appVersion: 2.8.6
     cid: Core600S-CID
-    configModule: ConfigModule
+    configModule: WFON_APR_LAP-C601S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -162,7 +162,7 @@ turn_off:
     accountID: sample_id
     appVersion: 2.8.6
     cid: Core600S-CID
-    configModule: ConfigModule
+    configModule: WFON_APR_LAP-C601S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -188,7 +188,7 @@ turn_off_display:
     accountID: sample_id
     appVersion: 2.8.6
     cid: Core600S-CID
-    configModule: ConfigModule
+    configModule: WFON_APR_LAP-C601S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -213,7 +213,7 @@ turn_on:
     accountID: sample_id
     appVersion: 2.8.6
     cid: Core600S-CID
-    configModule: ConfigModule
+    configModule: WFON_APR_LAP-C601S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -239,7 +239,7 @@ turn_on_display:
     accountID: sample_id
     appVersion: 2.8.6
     cid: Core600S-CID
-    configModule: ConfigModule
+    configModule: WFON_APR_LAP-C601S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -264,7 +264,7 @@ update:
     accountID: sample_id
     appVersion: 2.8.6
     cid: Core600S-CID
-    configModule: ConfigModule
+    configModule: WFON_APR_LAP-C601S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2

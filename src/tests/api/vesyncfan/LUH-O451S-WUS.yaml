@@ -7,7 +7,7 @@ automatic_stop_off:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LUH-O451S-WUS-CID
-    configModule: ConfigModule
+    configModule: WFON_AHM_LUH-A451S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -32,7 +32,7 @@ automatic_stop_on:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LUH-O451S-WUS-CID
-    configModule: ConfigModule
+    configModule: WFON_AHM_LUH-A451S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -57,7 +57,7 @@ set_auto_mode:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LUH-O451S-WUS-CID
-    configModule: ConfigModule
+    configModule: WFON_AHM_LUH-A451S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -82,7 +82,7 @@ set_humidity:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LUH-O451S-WUS-CID
-    configModule: ConfigModule
+    configModule: WFON_AHM_LUH-A451S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -107,7 +107,7 @@ set_manual_mode:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LUH-O451S-WUS-CID
-    configModule: ConfigModule
+    configModule: WFON_AHM_LUH-A451S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -132,7 +132,7 @@ set_mist_level:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LUH-O451S-WUS-CID
-    configModule: ConfigModule
+    configModule: WFON_AHM_LUH-A451S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -159,7 +159,7 @@ turn_off:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LUH-O451S-WUS-CID
-    configModule: ConfigModule
+    configModule: WFON_AHM_LUH-A451S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -185,7 +185,7 @@ turn_off_display:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LUH-O451S-WUS-CID
-    configModule: ConfigModule
+    configModule: WFON_AHM_LUH-A451S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -210,7 +210,7 @@ turn_on:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LUH-O451S-WUS-CID
-    configModule: ConfigModule
+    configModule: WFON_AHM_LUH-A451S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -236,7 +236,7 @@ turn_on_display:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LUH-O451S-WUS-CID
-    configModule: ConfigModule
+    configModule: WFON_AHM_LUH-A451S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2
@@ -261,7 +261,7 @@ update:
     accountID: sample_id
     appVersion: 2.8.6
     cid: LUH-O451S-WUS-CID
-    configModule: ConfigModule
+    configModule: WFON_AHM_LUH-A451S-WUSR_US
     debugMode: false
     deviceRegion: US
     method: bypassV2

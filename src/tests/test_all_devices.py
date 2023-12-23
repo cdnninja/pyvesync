@@ -72,6 +72,8 @@ class TestGeneralAPI(TestBase):
         self.manager.enabled = False
         assert self.manager.login()
         all_kwargs = parse_args(self.mock_api)
+        if self.build:
+            assert (self.overwrite is False) and (self.write_api is False)
         assert assert_test(self.manager.login, all_kwargs, None,
                            self.write_api, self.overwrite)
 
@@ -81,6 +83,8 @@ class TestGeneralAPI(TestBase):
         self.mock_api.return_value = call_json.DeviceList.device_list_response()
         self.manager.get_devices()
         all_kwargs = parse_args(self.mock_api)
+        if self.build:
+            assert (self.overwrite is False) and (self.write_api is False)
         assert assert_test(self.manager.get_devices, all_kwargs, None,
                            self.write_api, self.overwrite)
         assert len(self.manager.bulbs) == call_json_bulbs.BULBS_NUM
