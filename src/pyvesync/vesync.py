@@ -4,7 +4,9 @@ import logging
 import re
 import time
 from itertools import chain
-from typing import Tuple
+from typing import Tuple, Optional
+
+import aiohttp
 from pyvesync.helpers import Helpers
 import pyvesync.helpers as helpermodule
 from pyvesync.vesyncbasedevice import VeSyncBaseDevice
@@ -76,9 +78,16 @@ def object_factory(dev_type, config, manager) -> Tuple[str, VeSyncBaseDevice]:
 class VeSync:  # pylint: disable=function-redefined
     """VeSync Manager Class."""
 
-    def __init__(self, username, password, time_zone=DEFAULT_TZ,
-                 debug=False, redact=True):
+    def __init__(self,
+                 username: str,
+                 password: str,
+                 session: aiohttp.ClientSession,
+                 time_zone: str = DEFAULT_TZ,
+                 debug: bool = False,
+                 redact: bool = True):
         """Initialize VeSync Manager.
+
+        *Breaking Change* - `session` is now required for aiohttp.ClientSession
 
         This class is used as the manager for all VeSync objects, all methods and
         API calls are performed from this class. Time zone, debug and redact are
@@ -93,6 +102,8 @@ class VeSync:  # pylint: disable=function-redefined
                 VeSync account username (usually email address)
             password : str
                 VeSync account password
+            session : aiohttp.ClientSession
+                session to handle api requests
             time_zone : str, optional
                 Time zone for device from IANA database, by default DEFAULT_TZ
             debug : bool, optional
@@ -113,7 +124,8 @@ class VeSync:  # pylint: disable=function-redefined
             kitchen : list
                 List of VeSyncKitchen objects for smart kitchen appliances
         """
-        self.debug = debug
+        self.debug: bool = debug
+        self._session: aiohttp.ClientSession = session
         if debug:  # pragma: no cover
             logger.setLevel(logging.DEBUG)
             bulb_mods.logger.setLevel(logging.DEBUG)
@@ -122,30 +134,29 @@ class VeSync:  # pylint: disable=function-redefined
             fan_mods.logger.setLevel(logging.DEBUG)
             helpermodule.logger.setLevel(logging.DEBUG)
             kitchen_mods.logger.setLevel(logging.DEBUG)
-        self._redact = redact
+        self._redact: bool = redact
         if redact:
             self.redact = redact
-        self.username = username
-        self.password = password
-        self.token = None
-        self.account_id = None
-        self.country_code = None
-        self.devices = None
-        self.enabled = False
-        self.update_interval = API_RATE_LIMIT
-        self.last_update_ts = None
-        self.in_process = False
-        self._energy_update_interval = DEFAULT_ENER_UP_INT
-        self._energy_check = True
-        self._dev_list = {}
-        self.outlets = []
-        self.switches = []
-        self.fans = []
-        self.bulbs = []
-        self.scales = []
-        self.kitchen = []
+        self.username: str = username
+        self.password: str = password
+        self.token: Optional[str] = None
+        self.account_id: Optional[str] = None
+        self.country_code: Optional[str] = None
+        self.devices: Optional[int] = None
+        self.enabled: bool = False
+        self.update_interval: int = API_RATE_LIMIT
+        self.last_update_ts: Optional[float] = None
+        self.in_process: bool = False
+        self._energy_update_interval: int = DEFAULT_ENER_UP_INT
+        self._energy_check: bool = True
+        self.outlets: list = []
+        self.switches: list = []
+        self.fans: list = []
+        self.bulbs: list = []
+        self.scales: list = []
+        self.kitchen: list = []
 
-        self._dev_list = {
+        self._dev_list: dict = {
             'fans': self.fans,
             'outlets': self.outlets,
             'switches': self.switches,
@@ -314,14 +325,15 @@ class VeSync:  # pylint: disable=function-redefined
 
         return True
 
-    def get_devices(self) -> bool:
+    async def get_devices(self) -> bool:
         """Return tuple listing outlets, switches, and fans of devices."""
         if not self.enabled:
             return False
 
         self.in_process = True
         proc_return = False
-        response, _ = Helpers.call_api(
+        response, _ = await Helpers.call_api(
+            self._session,
             '/cloud/v1/deviceManaged/devices',
             'post',
             headers=Helpers.req_header_bypass(),
@@ -341,7 +353,7 @@ class VeSync:  # pylint: disable=function-redefined
 
         return proc_return
 
-    def login(self) -> bool:
+    async def login(self) -> bool:
         """Log into VeSync server.
 
         Username and password are provided when class is instantiated.
@@ -360,7 +372,8 @@ class VeSync:  # pylint: disable=function-redefined
             logger.error('Password invalid')
             return False
 
-        response, _ = Helpers.call_api(
+        response, _ = await Helpers.call_api(
+            self._session,
             '/cloud/v1/user/login', 'post',
             json_object=Helpers.req_body(self, 'login')
         )
@@ -387,7 +400,7 @@ class VeSync:  # pylint: disable=function-redefined
             return True
         return False
 
-    def update(self) -> None:
+    async def update(self) -> None:
         """Fetch updated information about devices.
 
         Pulls devices list from VeSync and instantiates any new devices. Devices
@@ -403,24 +416,24 @@ class VeSync:  # pylint: disable=function-redefined
             if not self.enabled:
                 logger.error('Not logged in to VeSync')
                 return
-            self.get_devices()
+            await self.get_devices()
 
             devices = list(self._dev_list.values())
 
             logger.debug('Start updating the device details one by one')
             for device in chain(*devices):
-                device.update()
+                await device.update()
 
             self.last_update_ts = time.time()
 
-    def update_energy(self, bypass_check=False) -> None:
+    async def update_energy(self, bypass_check=False) -> None:
         """Fetch updated energy information about devices."""
         if self.outlets:
             for outlet in self.outlets:
-                outlet.update_energy(bypass_check)
+                await outlet.update_energy(bypass_check)
 
-    def update_all_devices(self) -> None:
+    async def update_all_devices(self) -> None:
         """Run get_details() for each device."""
         devices = list(self._dev_list.keys())
         for dev in chain(*devices):
-            dev.get_details()
+            await dev.get_details()

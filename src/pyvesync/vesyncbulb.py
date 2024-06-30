@@ -274,11 +274,11 @@ class VeSyncBulb(VeSyncBaseDevice):
         return value_update
 
     @abstractmethod
-    def set_status(self) -> bool:
+    async def set_status(self) -> bool:
         """Set vesync bulb attributes(brightness, color_temp, etc)."""
 
     @abstractmethod
-    def get_details(self) -> None:
+    async def get_details(self) -> None:
         """Get vesync bulb details."""
 
     @abstractmethod
@@ -286,51 +286,51 @@ class VeSyncBulb(VeSyncBaseDevice):
         """Update bulb status from any api call response."""
 
     @abstractmethod
-    def toggle(self, status: str) -> bool:
+    async def toggle(self, status: str) -> bool:
         """Toggle vesync lightbulb."""
 
     @abstractmethod
-    def get_config(self) -> None:
+    async def get_config(self) -> None:
         """Call api to get configuration details and firmware."""
         pass
 
-    def set_hsv(self, hue, saturation, value):
+    async def set_hsv(self, hue, saturation, value) -> bool:
         """Set HSV if supported by bulb.
 
         Hue 0-360, Saturation 0-100, Value 0-100.
         """
         if self.rgb_shift_feature is False:
             logger.debug("HSV not supported by bulb")
-            return False
+        return False
 
-    def set_rgb(self, red: Optional[float] = None,
-                green: Optional[float] = None,
-                blue: Optional[float] = None) -> bool:
+    async def set_rgb(self, red: Optional[float] = None,
+                      green: Optional[float] = None,
+                      blue: Optional[float] = None) -> bool:
         """Set RGB if supported by bulb. Red 0-255, Green 0-255, Blue 0-255."""
         if self.rgb_shift_feature is False:
             logger.debug("RGB not supported by bulb")
             return False
         return True
 
-    def turn_on(self) -> bool:
+    async def turn_on(self) -> bool:
         """Turn on vesync bulbs."""
-        if self.toggle('on'):
+        if await self.toggle('on'):
             self.device_status = 'on'
             return True
         logger.warning('Error turning %s on', self.device_name)
         return False
 
-    def turn_off(self) -> bool:
+    async def turn_off(self) -> bool:
         """Turn off vesync bulbs."""
-        if self.toggle('off'):
+        if await self.toggle('off'):
             self.device_status = 'off'
             return True
         logger.warning('Error turning %s off', self.device_name)
         return False
 
-    def update(self) -> None:
+    async def update(self) -> None:
         """Update bulb details."""
-        self.get_details()
+        await self.get_details()
 
     def display(self) -> None:
         """Return formatted bulb info to stdout."""
@@ -354,7 +354,7 @@ class VeSyncBulb(VeSyncBaseDevice):
                 for line in disp:
                     print(f'{line[0]:.<30} {line[1]} {line[2]}')
 
-    def displayJSON(self) -> str:
+    def displayJSON(self) -> str:  # noqa: N802 # pylint: disable=invalid-name
         """Return bulb device info in JSON format."""
         sup = super().displayJSON()
         sup_val = json.loads(sup)
@@ -399,7 +399,7 @@ class VeSyncBulbESL100MC(VeSyncBulb):
         super().__init__(details, manager)
         self.details: dict = {}
 
-    def get_details(self) -> None:
+    async def get_details(self) -> None:
         """Get ESL100MC Details."""
         head = helpers.bypass_header()
         body = helpers.bypass_body_v2(self.manager)
@@ -411,7 +411,8 @@ class VeSyncBulbESL100MC(VeSyncBulb):
             'data': {}
         }
 
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/cloud/v2/deviceManaged/bypassV2',
             method='post',
             headers=head,
@@ -439,33 +440,33 @@ class VeSyncBulbESL100MC(VeSyncBulb):
                             blue=response.get('blue', 0))
         return True
 
-    def set_brightness(self, brightness: int) -> bool:
+    async def set_brightness(self, brightness: int) -> bool:
         """Set brightness of bulb."""
-        return self.set_status(brightness=brightness)
+        return await self.set_status(brightness=brightness)
 
-    def set_rgb_color(self, red: float, green: float, blue: float) -> bool:
+    async def set_rgb_color(self, red: float, green: float, blue: float) -> bool:
         """Set RGB Color of bulb."""
-        return self.set_status(red=red, green=green, blue=blue)
+        return await self.set_status(red=red, green=green, blue=blue)
 
-    def set_rgb(self, red: Optional[float] = None,
-                green: Optional[float] = None,
-                blue: Optional[float] = None) -> bool:
+    async def set_rgb(self, red: Optional[float] = None,
+                      green: Optional[float] = None,
+                      blue: Optional[float] = None) -> bool:
         """Set RGB Color of bulb."""
-        return self.set_status(red=red, green=green, blue=blue)
+        return await self.set_status(red=red, green=green, blue=blue)
 
-    def set_hsv(self, hue, saturation, value):
+    async def set_hsv(self, hue, saturation, value):
         """Set HSV Color of bulb."""
         rgb = Color(hue=hue, saturation=saturation, value=value).rgb
-        return self.set_status(red=rgb.red, green=rgb.green, blue=rgb.blue)
+        return await self.set_status(red=rgb.red, green=rgb.green, blue=rgb.blue)
 
-    def enable_white_mode(self) -> bool:
+    async def enable_white_mode(self) -> bool:
         """Enable white mode on bulb."""
-        return self.set_status(brightness=100)
+        return await self.set_status(brightness=100)
 
-    def set_status(self, brightness: Optional[NUMERIC_T] = None,
-                   red: Optional[NUMERIC_T] = None,
-                   green: Optional[NUMERIC_T] = None,
-                   blue: Optional[NUMERIC_T] = None) -> bool:
+    async def set_status(self, brightness: Optional[NUMERIC_T] = None,
+                         red: Optional[NUMERIC_T] = None,
+                         green: Optional[NUMERIC_T] = None,
+                         blue: Optional[NUMERIC_T] = None) -> bool:
         """Set status of VeSync ESL100MC."""
         brightness_update = 100
         if red is not None and green is not None and blue is not None:
@@ -506,7 +507,8 @@ class VeSyncBulbESL100MC(VeSyncBulb):
             }
         }
 
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/cloud/v2/deviceManaged/bypassV2',
             method='post',
             headers=head,
@@ -528,7 +530,7 @@ class VeSyncBulbESL100MC(VeSyncBulb):
         self.device_status = 'on'
         return True
 
-    def toggle(self, status: str) -> bool:
+    async def toggle(self, status: str) -> bool:
         """Toggle bulb status."""
         if status == 'on':
             turn_on = True
@@ -549,7 +551,8 @@ class VeSyncBulbESL100MC(VeSyncBulb):
                 'enabled': turn_on
             }
         }
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/cloud/v2/deviceManaged/bypassV2',
             method='post',
             headers=head,
@@ -573,11 +576,12 @@ class VeSyncBulbESL100(VeSyncBulb):
         super().__init__(details, manager)
         self.details: dict = {}
 
-    def get_details(self) -> None:
+    async def get_details(self) -> None:
         """Get details of dimmable bulb."""
         body = helpers.req_body(self.manager, 'devicedetail')
         body['uuid'] = self.uuid
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/SmartBulb/v1/device/devicedetail',
             'post',
             headers=helpers.req_headers(self.manager),
@@ -591,13 +595,14 @@ class VeSyncBulbESL100(VeSyncBulb):
         else:
             logger.debug('Error getting %s details', self.device_name)
 
-    def get_config(self) -> None:
+    async def get_config(self) -> None:
         """Get configuration of dimmable bulb."""
         body = helpers.req_body(self.manager, 'devicedetail')
         body['method'] = 'configurations'
         body['uuid'] = self.uuid
 
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/SmartBulb/v1/device/configurations',
             'post',
             headers=helpers.req_headers(self.manager),
@@ -609,12 +614,13 @@ class VeSyncBulbESL100(VeSyncBulb):
         else:
             logger.debug('Error getting %s config info', self.device_name)
 
-    def toggle(self, status) -> bool:
+    async def toggle(self, status) -> bool:
         """Toggle dimmable bulb."""
         body = helpers.req_body(self.manager, 'devicestatus')
         body['uuid'] = self.uuid
         body['status'] = status
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/SmartBulb/v1/device/devicestatus',
             'put',
             headers=helpers.req_headers(self.manager),
@@ -625,7 +631,7 @@ class VeSyncBulbESL100(VeSyncBulb):
             return True
         return False
 
-    def set_brightness(self, brightness: int) -> bool:
+    async def set_brightness(self, brightness: int) -> bool:
         """Set brightness of dimmable bulb."""
         if not self.dimmable_feature:
             logger.debug('%s is not dimmable', self.device_name)
@@ -635,12 +641,15 @@ class VeSyncBulbESL100(VeSyncBulb):
             logger.debug("Device already in requested state")
             return True
         if self.device_status == 'off':
-            self.toggle('on')
+            if await self.toggle('on') is False:
+                logger.debug('Error turning %s on', self.device_name)
+                return False
         body = helpers.req_body(self.manager, 'devicestatus')
         body['uuid'] = self.uuid
         body['status'] = 'on'
         body['brightNess'] = str(brightness_update)
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/SmartBulb/v1/device/updateBrightness',
             'put',
             headers=helpers.req_headers(self.manager),
@@ -662,13 +671,14 @@ class VeSyncBulbESL100CW(VeSyncBulb):
         """Initialize Etekcity Tunable white bulb."""
         super().__init__(details, manager)
 
-    def get_details(self) -> None:
+    async def get_details(self) -> None:
         """Get details of tunable bulb."""
         body = helpers.req_body(self.manager, 'bypass')
         body['cid'] = self.cid
         body['jsonCmd'] = {'getLightStatus': 'get'}
         body['configModule'] = self.config_module
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/cloud/v1/deviceManaged/bypass',
             'post',
             headers=helpers.req_headers(self.manager),
@@ -699,12 +709,13 @@ class VeSyncBulbESL100CW(VeSyncBulb):
         self._brightness = response.get('brightness', 0)
         self._color_temp = response.get('colorTempe', 0)
 
-    def get_config(self) -> None:
+    async def get_config(self) -> None:
         """Get configuration and firmware info of tunable bulb."""
         body = helpers.req_body(self.manager, 'bypass_config')
         body['uuid'] = self.uuid
 
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/cloud/v1/deviceManaged/configurations',
             'post',
             headers=helpers.req_headers(self.manager),
@@ -716,7 +727,7 @@ class VeSyncBulbESL100CW(VeSyncBulb):
         else:
             logger.debug('Error getting %s config info', self.device_name)
 
-    def toggle(self, status) -> bool:
+    async def toggle(self, status) -> bool:
         """Toggle tunable bulb."""
         if status not in ('on', 'off'):
             logger.debug('Invalid status %s', status)
@@ -725,7 +736,8 @@ class VeSyncBulbESL100CW(VeSyncBulb):
         body['cid'] = self.cid
         body['configModule'] = self.config_module
         body['jsonCmd'] = {'light': {'action': status}}
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/cloud/v1/deviceManaged/bypass',
             'post',
             headers=helpers.req_headers(self.manager),
@@ -739,7 +751,7 @@ class VeSyncBulbESL100CW(VeSyncBulb):
         self.connection_status = 'offline'
         return False
 
-    def set_brightness(self, brightness: int) -> bool:
+    async def set_brightness(self, brightness: int) -> bool:
         """Set brightness of tunable bulb."""
         brightness_update = int(self._validate_brightness(brightness))
         if self.device_status == 'on' and brightness_update == self._brightness:
@@ -753,7 +765,8 @@ class VeSyncBulbESL100CW(VeSyncBulb):
         if self.device_status == 'off':
             light_dict['action'] = 'on'
         body['jsonCmd'] = {'light': light_dict}
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/cloud/v1/deviceManaged/bypass',
             'post',
             headers=helpers.req_headers(self.manager),
@@ -771,7 +784,7 @@ class VeSyncBulbESL100CW(VeSyncBulb):
 
         return False
 
-    def set_color_temp(self, color_temp: int) -> bool:
+    async def set_color_temp(self, color_temp: int) -> bool:
         """Set Color Temperature of Bulb in pct (1 - 100)."""
         color_temp_update = self._validate_color_temp(color_temp)
         if self.device_status == 'on' and color_temp_update == self._color_temp:
@@ -783,7 +796,8 @@ class VeSyncBulbESL100CW(VeSyncBulb):
         body['jsonCmd']['light']['colorTempe'] = color_temp_update
         if self.device_status == 'off':
             body['jsonCmd']['light']['action'] = 'on'
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/cloud/v1/deviceManaged/bypass',
             'post',
             headers=helpers.req_headers(self.manager),
@@ -818,7 +832,7 @@ class VeSyncBulbValcenoA19MC(VeSyncBulb):
         """Initialize Multicolor bulb."""
         super().__init__(details, manager)
 
-    def get_details(self) -> None:
+    async def get_details(self) -> None:
         """Get details of multicolor bulb."""
         body = helpers.req_body(self.manager, 'bypassV2')
         body['cid'] = self.cid
@@ -828,7 +842,8 @@ class VeSyncBulbValcenoA19MC(VeSyncBulb):
             'source': 'APP',
             'data': {},
         }
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/cloud/v2/deviceManaged/bypassV2',
             'post',
             headers=helpers.req_header_bypass(),
@@ -871,12 +886,13 @@ class VeSyncBulbValcenoA19MC(VeSyncBulb):
                 response.get('msg'),
             )
 
-    def get_config(self) -> None:
+    async def get_config(self) -> None:
         """Get configuration and firmware info of multicolor bulb."""
         body = helpers.req_body(self.manager, 'bypass')
         body['method'] = 'configurations'
         body['uuid'] = self.uuid
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/cloud/v1/deviceManaged/configurations',
             'post',
             headers=helpers.req_header_bypass(),
@@ -908,7 +924,7 @@ class VeSyncBulbValcenoA19MC(VeSyncBulb):
         self.config['ownerShip'] = (
             conf_dict.get('ownerShip', False))
 
-    def toggle(self, status: str) -> bool:
+    async def toggle(self, status: str) -> bool:
         """Toggle multicolor bulb."""
         body = helpers.req_body(self.manager, 'bypassV2')
         if status == 'off':
@@ -932,7 +948,8 @@ class VeSyncBulbValcenoA19MC(VeSyncBulb):
                 'enabled': status_bool,
                 }
             }
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/cloud/v2/deviceManaged/bypassV2',
             'post',
             headers=helpers.req_header_bypass(),
@@ -945,43 +962,43 @@ class VeSyncBulbValcenoA19MC(VeSyncBulb):
         self.connection_status = 'offline'
         return False
 
-    def set_rgb(self, red: NUMERIC_T = None,
-                green: NUMERIC_T = None,
-                blue: NUMERIC_T = None) -> bool:
+    async def set_rgb(self, red: NUMERIC_T = None,
+                      green: NUMERIC_T = None,
+                      blue: NUMERIC_T = None) -> bool:
         """Set RGB - red, green & blue 0-255."""
         new_color = Color(red=red, green=green, blue=blue).hsv
-        return self.set_hsv(hue=new_color.hue,
-                            saturation=new_color.saturation,
-                            value=new_color.value)
+        return await self.set_hsv(hue=new_color.hue,
+                                  saturation=new_color.saturation,
+                                  value=new_color.value)
 
-    def set_brightness(self, brightness: int) -> bool:
+    async def set_brightness(self, brightness: int) -> bool:
         """Set brightness of multicolor bulb."""
-        return self.set_status(brightness=brightness)
+        return await self.set_status(brightness=brightness)
 
-    def set_color_temp(self, color_temp: int) -> bool:
+    async def set_color_temp(self, color_temp: int) -> bool:
         """Set White Temperature of Bulb in pct (0 - 100)."""
-        return self.set_status(color_temp=color_temp)
+        return await self.set_status(color_temp=color_temp)
 
-    def set_color_hue(self, color_hue: float) -> bool:
+    async def set_color_hue(self, color_hue: float) -> bool:
         """Set Color Hue of Bulb (0 - 360)."""
-        return self.set_status(color_hue=color_hue)
+        return await self.set_status(color_hue=color_hue)
 
-    def set_color_saturation(self, color_saturation: float) -> bool:
+    async def set_color_saturation(self, color_saturation: float) -> bool:
         """Set Color Saturation of Bulb in pct (1 - 100)."""
-        return self.set_status(color_saturation=color_saturation)
+        return await self.set_status(color_saturation=color_saturation)
 
-    def set_color_value(self, color_value: float) -> bool:
+    async def set_color_value(self, color_value: float) -> bool:
         """Set Value of multicolor bulb in pct (1 - 100)."""
         # Equivalent to brightness level, when in color mode.
-        return self.set_status(color_value=color_value)
+        return await self.set_status(color_value=color_value)
 
-    def set_color_mode(self, color_mode: str) -> bool:
+    async def set_color_mode(self, color_mode: str) -> bool:
         """Set Color Mode of Bulb (white / hsv)."""
-        return self.set_status(color_mode=color_mode)
+        return await self.set_status(color_mode=color_mode)
 
-    def set_hsv(self, hue: NUMERIC_T = None,
-                saturation: NUMERIC_T = None,
-                value: NUMERIC_T = None) -> bool:
+    async def set_hsv(self, hue: NUMERIC_T = None,
+                      saturation: NUMERIC_T = None,
+                      value: NUMERIC_T = None) -> bool:
         """Set HSV Values."""
         arg_dict = {"hue": hue, "saturation": saturation, "value": value}
         if hue is not None:
@@ -1023,20 +1040,20 @@ class VeSyncBulbValcenoA19MC(VeSyncBulb):
             if key == "brightness" and isinstance(val, float):
                 arg_dict[key] = int(round(val, 0))
         arg_dict['colorMode'] = 'hsv'
-        return self._set_status_api(arg_dict)
+        return await self._set_status_api(arg_dict)
 
-    def enable_white_mode(self) -> bool:
+    async def enable_white_mode(self) -> bool:
         """Enable white color mode."""
-        return self.set_status(color_mode='white')
+        return await self.set_status(color_mode='white')
 
-    def set_status(self,
-                   brightness: NUMERIC_T = None,
-                   color_temp: NUMERIC_T = None,
-                   color_saturation: NUMERIC_T = None,
-                   color_hue: NUMERIC_T = None,
-                   color_mode: Optional[str] = None,
-                   color_value: NUMERIC_T = None
-                   ) -> bool:
+    async def set_status(self,
+                         brightness: NUMERIC_T = None,
+                         color_temp: NUMERIC_T = None,
+                         color_saturation: NUMERIC_T = None,
+                         color_hue: NUMERIC_T = None,
+                         color_mode: Optional[str] = None,
+                         color_value: NUMERIC_T = None
+                         ) -> bool:
         """Set multicolor bulb parameters.
 
         No arguments turns bulb on.
@@ -1068,14 +1085,14 @@ class VeSyncBulbValcenoA19MC(VeSyncBulb):
             if locals()[val] is not None:
                 toggle_on = False
         if toggle_on:
-            self.turn_on()
+            await self.turn_on()
 
         # If any HSV color values are passed,
         # set HSV status & ignore other values
         # Set Color if hue, saturation or value is set
         if color_hue is not None or color_value is not None or \
                 color_saturation is not None:
-            return self.set_hsv(color_hue, color_saturation, color_value)
+            return await self.set_hsv(color_hue, color_saturation, color_value)
 
         # initiate variables
         request_dict = {
@@ -1130,7 +1147,7 @@ class VeSyncBulbValcenoA19MC(VeSyncBulb):
             return True
         return False
 
-    def _set_status_api(self, data_dict: dict) -> bool:
+    async def _set_status_api(self, data_dict: dict) -> bool:
         """Call api to set status - INTERNAL."""
         data_dict_start = {
             "force": 1,
@@ -1151,7 +1168,8 @@ class VeSyncBulbValcenoA19MC(VeSyncBulb):
             'data': data_dict_start
         }
         # Make API call
-        r, _ = helpers.call_api(
+        r, _ = await helpers.call_api(
+            self.manager._session,
             '/cloud/v2/deviceManaged/bypassV2',
             'post',
             headers=helpers.req_header_bypass(),

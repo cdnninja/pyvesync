@@ -1,14 +1,17 @@
 """Helper functions for VeSync API."""
 
+import asyncio
 import hashlib
 import logging
 import time
 import json
 import colorsys
+from math import ceil
 from dataclasses import dataclass, field, InitVar
 from typing import Any, Dict, NamedTuple, Optional, Union
 import re
-import requests
+import aiohttp.client_exceptions
+import aiohttp
 
 
 logger = logging.getLogger(__name__)
@@ -18,6 +21,8 @@ API_RATE_LIMIT = 30
 # If device is out of reach, the cloud api sends a timeout response after 7 seconds,
 # using 8 here so there is time enough to catch that message
 API_TIMEOUT = 8
+API_RETRY = 3
+API_EXP_BACKOFF = 1.7
 USER_AGENT = ("VeSync/3.2.39 (com.etekcity.vesyncPlatform;"
               " build:5; iOS 15.5.0) Alamofire/5.2.1")
 
@@ -32,6 +37,29 @@ USER_TYPE = '1'
 BYPASS_APP_V = "VeSync 3.0.51"
 
 NUMERIC = Optional[Union[int, float, str]]
+
+
+class VSSession:
+    session: Optional[aiohttp.ClientSession] = None
+
+    @classmethod
+    async def make_session(cls):
+        cls.session = aiohttp.ClientSession()
+
+    async def __aenter__(self):
+        if self.session is None:
+            self.session = aiohttp.ClientSession()
+        return self.session
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await self.session.close()
+        self.session = None
+        asyncio.sleep(0.25)
+
+    async def __call__(self):
+        if self.session is None:
+            self.session = aiohttp.ClientSession()
+        return self.session
 
 
 class Helpers:
@@ -135,7 +163,7 @@ class Helpers:
         return body
 
     @staticmethod
-    def calculate_hex(hex_string) -> float:
+    def calculate_hex(hex_string: str) -> float:
         """Credit for conversion to itsnotlupus/vesync_wsproxy."""
         hex_conv = hex_string.split(':')
         converted_hex = (int(hex_conv[0], 16) + int(hex_conv[1], 16)) / 8192
@@ -143,7 +171,7 @@ class Helpers:
         return converted_hex
 
     @staticmethod
-    def hash_password(string) -> str:
+    def hash_password(string: str) -> str:
         """Encode password."""
         return hashlib.md5(string.encode('utf-8')).hexdigest()
 
@@ -182,11 +210,48 @@ class Helpers:
         return True
 
     @staticmethod
-    def call_api(api: str, method: str, json_object:  Optional[dict] = None,
-                 headers: Optional[dict] = None) -> tuple:
-        """Make API calls by passing endpoint, header and body."""
-        response = None
-        status_code = None
+    async def call_api(session: aiohttp.ClientSession,
+                       api: str,
+                       method: str,
+                       json_object:  Optional[dict] = None,
+                       headers: Optional[dict] = None,
+                       retries: Optional[int] = None
+                       ) -> tuple:
+        """Makes an async API call to VeSync server.
+
+        Uses API_EXP_BACKOFF for exponential backoff on retries with a default of 1.7
+        and 3 retries.
+
+        Arguments
+        ----------
+            session: aiohttp.ClientSession
+                The aiohttp client session to use for the API call.
+            api: str
+                The API endpoint to call excluding the base domain.
+            method: str
+                The HTTP method to use for the API call (GET, POST, or PUT).
+            json_object: Optional, dict
+                The JSON payload to send with the API call. Defaults to None.
+            headers: dict, None
+                The headers to include in the API call. Defaults to None.
+            retries: int, None
+                The number of times to retry the API call in case of failure. Defaults to None.
+
+        Returns
+        -------
+            tuple: A tuple containing the API response JSON and the HTTP status code.
+
+        Raises
+        ------
+            NameError: If an invalid HTTP method is provided.
+
+        """
+        resp_json: Optional[dict] = None
+        status_code: Optional[int] = None
+
+        method = method.upper()
+        if method not in ['GET', 'POST', 'PUT']:
+            raise NameError(f'Invalid method {method}')
 
         try:
             logger.debug("=======call_api=============================")
@@ -196,37 +261,32 @@ class Helpers:
                          Helpers.redactor(json.dumps(headers, indent=2)))
             logger.debug("API call json: \n  %s",
                          Helpers.redactor(json.dumps(json_object, indent=2)))
-            if method.lower() == 'get':
-                r = requests.get(
-                    API_BASE_URL + api, json=json_object, headers=headers,
-                    timeout=API_TIMEOUT
-                )
-            elif method.lower() == 'post':
-                r = requests.post(
-                    API_BASE_URL + api, json=json_object, headers=headers,
-                    timeout=API_TIMEOUT
-                )
-            elif method.lower() == 'put':
-                r = requests.put(
-                    API_BASE_URL + api, json=json_object, headers=headers,
-                    timeout=API_TIMEOUT
-                )
-            else:
-                raise NameError(f'Invalid method {method}')
-        except requests.exceptions.RequestException as e:
+            url = API_BASE_URL + api
+            resp_json = None
+            status_code = None
+            if retries is None:
+                retries = API_RETRY
+            for retry in range(retries):
+                try:
+                    async with session.request(method, url,
+                                               json=json_object,
+                                               headers=headers
+                                               ) as resp:
+                        status_code = resp.status
+                        resp_json = await resp.json()
+                        if resp_json is not None:
+                            logger.debug("API response: \n\n  %s \n ",
+                                         Helpers.redactor(json.dumps(resp_json, indent=2)))
+                        else:
+                            logger.debug('Unable to fetch %s%s', API_BASE_URL, api)
+                        break
+                except aiohttp.client_exceptions.ServerTimeoutError:
+                    logger.debug("Request timeout on retry %s", retry)
+                    await asyncio.sleep(ceil(API_EXP_BACKOFF ** retry))
+                    continue
+        except aiohttp.client_exceptions.ClientError as e:
             logger.debug(e)
-        except Exception as e:  # pylint: disable=broad-except
-            logger.debug(e)
-        else:
-            if r.status_code == 200:
-                status_code = 200
-                if r.content:
-                    response = r.json()
-                    logger.debug("API response: \n\n  %s \n ",
-                                 Helpers.redactor(json.dumps(response, indent=2)))
-            else:
-                logger.debug('Unable to fetch %s%s', API_BASE_URL, api)
-        return response, status_code
+        return resp_json, status_code
 
     @staticmethod
     def code_check(r: dict) -> bool:

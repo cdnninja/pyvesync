@@ -90,15 +90,18 @@ class VeSyncBaseDevice:
             logger.debug('Call device.get_config() to get firmware versions')
         return False
 
-    def get_pid(self) -> None:
+    async def get_pid(self) -> None:
         """Get managed device configuration."""
         body = helper.req_body(self.manager, 'devicedetail')
         body['configModule'] = self.config_module
         body['region'] = self.device_region
         body['method'] = 'configInfo'
-        r, _ = helper.call_api('/cloud/v1/deviceManaged/configInfo',
-                               'post',
-                               json_object=body)
+        r, _ = await helper.call_api(
+                self.manager._session,
+                '/cloud/v1/deviceManaged/configInfo',
+                'post',
+                json_object=body
+                )
         if not isinstance(r, dict) or r.get('code') != 0 or r.get('result') is None:
             logger.error('Error getting config info for %s', self.device_name)
             return
@@ -121,7 +124,7 @@ class VeSyncBaseDevice:
         for line in disp:
             print(f'{line[0]:.<30} {line[1]}')
 
-    def displayJSON(self) -> str:  # pylint: disable=invalid-name
+    def displayJSON(self) -> str:  # noqa: N802 # pylint: disable=invalid-name
         """JSON API for device details."""
         return json.dumps(
             {
