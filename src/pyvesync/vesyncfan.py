@@ -27,7 +27,8 @@ humid_features: dict = {
         'models': ['Dual200S',
                    'LUH-D301S-WUSR',
                    'LUH-D301S-WJP',
-                   'LUH-D301S-WEU'],
+                   'LUH-D301S-WEU',
+                   'LUH-D301S-KEUR'],
         'features': [],
         'mist_modes': ['auto', 'manual'],
         'mist_levels': list(range(1, 3))
