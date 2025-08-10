@@ -11,7 +11,8 @@ from aiohttp.client_exceptions import ClientResponseError
 from mashumaro.mixins.orjson import DataClassORJSONMixin
 
 from pyvesync.utils.helpers import Helpers
-from pyvesync.const import API_BASE_URL, DEFAULT_REGION
+from pyvesync.const import get_api_base_url
+from pyvesync.utils.auth import VeSyncAuth
 from pyvesync.device_container import DeviceContainer, DeviceContainerInstance
 from pyvesync.utils.logs import LibraryLogger
 from pyvesync.models.vesync_models import (
@@ -49,12 +50,14 @@ class VeSync:  # pylint: disable=function-redefined
     __slots__ = (
         '__weakref__',
         '_account_id',
+        '_base_url',
         '_close_session',
         '_debug',
         '_device_container',
         '_redact',
         '_token',
         '_verbose',
+        'auth',
         'country_code',
         'enabled',
         'in_process',
@@ -68,8 +71,10 @@ class VeSync:  # pylint: disable=function-redefined
     def __init__(self,
                  username: str,
                  password: str,
+                 country_code: str,
                  session: ClientSession | None = None,
-                 time_zone: str = DEFAULT_TZ) -> None:
+                 time_zone: str = DEFAULT_TZ,
+                 ) -> None:
         """Initialize VeSync Manager.
 
         This class is used as the manager for all VeSync objects, all methods and
@@ -84,6 +89,8 @@ class VeSync:  # pylint: disable=function-redefined
         Args:
             username (str): VeSync account username (usually email address)
             password (str): VeSync account password
+            country_code (str): Country code for VeSync account, defaults to 'US'.
+                This is used to determine the API base URL.
             session (ClientSession): aiohttp client session for
                 API calls, by default None
             time_zone (str): Time zone for device from IANA database, by default
@@ -101,6 +108,11 @@ class VeSync:  # pylint: disable=function-redefined
             country_code (str): Country code for VeSync account pulled from API
             time_zone (str): Time zone for VeSync account pulled from API
             enabled (bool): True if logged in to VeSync, False if not
+
+        Methods:
+            from_auth(auth: dict | Path | str) -> VeSync:
+                Create a VeSync instance from an existing authentication data. See also
+                [`VeSyncAuth`][pyvesync.utils.auth.VeSyncAuth] for more information.
 
         Note:
             This class is a context manager, use `async with VeSync() as manager:`
@@ -129,15 +141,72 @@ class VeSync:  # pylint: disable=function-redefined
             self.redact = self.redact
         self.username: str = username
         self.password: str = password
-        self._token: str | None = None
-        self._account_id: str | None = None
-        self.country_code: str = DEFAULT_REGION
+        self.country_code: str = country_code
         self._verbose: bool = False
         self.time_zone: str = time_zone
         self.language: str = 'en'
         self.enabled = False
         self.in_process = False
+        self._base_url = get_api_base_url(country_code)
+        self.auth: VeSyncAuth | None = None
         self._device_container: DeviceContainer = DeviceContainerInstance
+
+    @classmethod
+    def from_auth(cls, auth: dict | Path | str) -> VeSync:
+        """Create a VeSync instance from an existing VeSyncAuth object or data.
+
+        Args:
+            auth (dict | Path | str): Authentication data or path to a JSON file
+                containing the authentication data.
+
+        Returns:
+            VeSync: An instance of the VeSync class initialized but without entering the
+                context manager. The auth attribute is set.
+
+        Raises:
+            ValueError: If the auth argument is not a valid dict, Path, or str.
+
+        Example:
+            >>> auth_data = {
+                "username": "user@example.com",
+                "password": "securepassword",
+                "country_code": "US",
+                "token": "your_token_here",
+                "account_id": "your_account_id_here"
+            }
+            >>> with VeSync.from_auth(auth_data) as manager: ...
+
+            >>> with VeSync.from_auth("path/to/auth.json") as manager: ...
+        """
+        auth_obj = cls._process_auth_argument(auth)
+        if auth_obj is None:
+            raise ValueError(
+                "Invalid auth argument provided, must be a dict, or path to JSON file."
+            )
+        instance = cls(
+            username=auth_obj.username,
+            password=auth_obj.password,
+            country_code=auth_obj.country_code,
+        )
+        instance.auth = auth_obj
+        instance.enabled = True
+        return instance
+
+    @classmethod
+    def _process_auth_argument(cls, auth: dict | Path | str | None) -> VeSyncAuth | None:
+        """Process the auth argument to set up authentication."""
+        if isinstance(auth, str):
+            if Path(auth).is_file():
+                return VeSyncAuth.from_json_file(auth)
+            return VeSyncAuth.from_json(auth)
+
+        if isinstance(auth, Path):
+            return VeSyncAuth.from_json_file(auth)
+
+        if isinstance(auth, dict):
+            return VeSyncAuth.from_dict(auth)
+
+        return None
 
     @property
     def devices(self) -> DeviceContainer:
@@ -152,16 +221,16 @@ class VeSync:  # pylint: disable=function-redefined
     @property
     def token(self) -> str:
         """Return VeSync API token."""
-        if self._token is None:
-            raise AttributeError('Token not set, run login() method')
-        return self._token
+        if self.auth is None:
+            raise AttributeError('Not authenticated, run login() method')
+        return self.auth.token
 
     @property
     def account_id(self) -> str:
         """Return VeSync account ID."""
-        if self._account_id is None:
-            raise AttributeError('Account ID not set, run login() method')
-        return self._account_id
+        if self.auth is None:
+            raise AttributeError('Not authenticated, run login() method')
+        return self.auth.account_id
 
     @property
     def debug(self) -> bool:
@@ -308,11 +377,11 @@ class VeSync:  # pylint: disable=function-redefined
             raise VesyncLoginError('Username and password must be specified')
         request_login = RequestLoginModel(
             email=self.username,
-            method='appLoginV3',
+            method='appLoginV4',
             password=self.password,
         )
         resp_dict, _ = await self.async_call_api(
-            '/user/api/accountManage/v3/appLoginV3', 'post',
+            '/user/api/accountManage/v4/appLoginV4', 'post',
             json_object=request_login
         )
         if resp_dict is None:
@@ -326,8 +395,13 @@ class VeSync:  # pylint: disable=function-redefined
                     'Error receiving response to login request'
                     ) from exc
             result = response_model.result
-            self._token = result.token
-            self._account_id = result.accountID
+            self.auth = VeSyncAuth(
+                username=self.username,
+                password=self.password,
+                account_id=result.accountID,
+                token=result.token,
+                country_code=result.countryCode,
+            )
             self.country_code = result.countryCode
             self.enabled = True
             logger.debug('Login successful')
@@ -424,7 +498,7 @@ class VeSync:  # pylint: disable=function-redefined
         try:
             async with self.session.request(
                 method,
-                url=API_BASE_URL + api,
+                url=self._base_url + api,
                 json=req_dict,
                 headers=headers,
                 raise_for_status=False,

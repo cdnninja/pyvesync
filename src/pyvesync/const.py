@@ -28,6 +28,7 @@ from pyvesync.utils.enum_utils import IntEnumMixin
 
 DEFAULT_LANGUAGE = "en"
 API_BASE_URL = "https://smartapi.vesync.com"
+EU_BASE_URL = "https://smartapi.vesync.eu"
 # If device is out of reach, the cloud api sends a timeout response after 7 seconds,
 # using 8 here so there is time enough to catch that message
 API_TIMEOUT = 8
@@ -36,7 +37,7 @@ USER_AGENT = (
 )
 DEFAULT_TZ = "America/New_York"
 DEFAULT_REGION = "US"
-APP_VERSION = "5.5.60"
+APP_VERSION = "5.6.40"
 PHONE_BRAND = "SM N9005"
 PHONE_OS = "Android"
 # MOBILE_ID = "1234567890123456"
@@ -48,6 +49,13 @@ TERMINAL_ID = '2' + str(uuid4()).replace('-', '')
 
 
 # Generic Constants
+
+def get_api_base_url(country_code: str) -> str:
+    """Get the API base URL for a specific country code."""
+    us_codes = ["CA", "JP", "MX", "US"]
+    if country_code not in us_codes:
+        return EU_BASE_URL
+    return API_BASE_URL
 
 
 class ProductTypes(StrEnum):

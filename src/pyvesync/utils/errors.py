@@ -156,6 +156,11 @@ class ErrorCodes:
             "-11202000": ResponseInfo(
                 "ACCOUNT_NOT_EXIST", ErrorTypes.AUTHENTICATION, "Account does not exist"
             ),
+            "-11000000": ResponseInfo(
+                "PARAMETER_ERROR",
+                ErrorTypes.REQUEST_ERROR,
+                "Invalid request parameters"
+            ),
             "-11300027": ResponseInfo(
                 "AIRPURGE_OFFLINE",
                 ErrorTypes.DEVICE_OFFLINE,
@@ -171,8 +176,15 @@ class ErrorCodes:
             "-11902000": ResponseInfo(
                 "AUTHKEY_NOT_EXIST", ErrorTypes.CONFIG_ERROR, "Authkey does not exist"
             ),
+            "-13107000": ResponseInfo(
+                "APP_VERSION_TOO_LOW",
+                ErrorTypes.SERVER_ERROR,
+                "App version too low, please file an issue.",
+            ),
             "-11900000": ResponseInfo(
-                "AUTHKEY_PID_NOT_MATCH", ErrorTypes.DEVICE_ERROR, "Authkey PID mismatch"
+                "AUTHKEY_PID_NOT_MATCH",
+                ErrorTypes.DEVICE_ERROR,
+                "Authkey PID mismatch, please file an issue.",
             ),
             "-11504000": ResponseInfo(
                 "AWAY_MAX", ErrorTypes.CONFIG_ERROR, "Away maximum reached"
@@ -212,19 +224,19 @@ class ErrorCodes:
                 "BYPASS_LEFT_ZONE_COOKING",
                 ErrorTypes.DEVICE_ERROR,
                 "Left zone cooking error",
-                device_online=True
+                device_online=True,
             ),
             "11911000": ResponseInfo(
                 "BYPASS_RIGHT_ZONE_COOKING",
                 ErrorTypes.DEVICE_ERROR,
                 "Right zone cooking error",
-                device_online=True
+                device_online=True,
             ),
             "11912000": ResponseInfo(
                 "BYPASS_ALL_ZONE_COOKING",
                 ErrorTypes.DEVICE_ERROR,
                 "All zone cooking error",
-                device_online=True
+                device_online=True,
             ),
             "11916000": ResponseInfo(
                 "BYPASS_NTC_RIGHT_TOP_SHORT",
@@ -232,7 +244,7 @@ class ErrorCodes:
                 "Right top short error",
                 critical_error=True,
                 device_online=True,
-                ),
+            ),
             "11917000": ResponseInfo(
                 "BYPASS_NTC_RIGHT_TOP_OPEN",
                 ErrorTypes.DEVICE_ERROR,
@@ -670,6 +682,9 @@ class ErrorCodes:
             "-11103000": ResponseInfo(
                 "SERVER_BUSY", ErrorTypes.SERVER_ERROR, "Server busy"
             ),
+            "-11002002": ResponseInfo(
+                "CLOUD_EXCEPTION", ErrorTypes.SERVER_ERROR, "Cloud exception"
+            ),
             "-11104000": ResponseInfo(
                 "SERVER_TIMEOUT", ErrorTypes.SERVER_ERROR, "Server timeout"
             ),
@@ -717,13 +732,11 @@ class ErrorCodes:
             ),
             "11005000": ResponseInfo(
                 "BYPASS_DEVICE_IS_OFF",
-                ErrorTypes.DEVICE_ERROR, "Device is off"
+                ErrorTypes.DEVICE_ERROR,
                 "Device is off",
                 critical_error=True,
                 device_online=True,
             ),
-
-
         }
     )
 
