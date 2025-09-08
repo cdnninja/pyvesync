@@ -74,6 +74,8 @@ pyvesync 3.0 will be released very shortly and will have **MAJOR BREAKING CHANGE
 
 If you are currently using the library and wish to upgrade, please test you devices and create an issue with any bugs or feedback. This is a simple helper script to assist with testing: [testing_scripts](https://github.com/webdjoe/pyvesync/tree/dev-2.0/testing_scripts)
 
+If you do not wish to upgrade, please pin your version to 2.1.18. The v2 release will not receive any updates or bug fixes.
+
 ## Installation
 
 Install the latest version from pip:
