@@ -28,13 +28,13 @@ DEVICE_CATEGORIES = [
     "thermostats",
 ]
 
-ALL_DEVICES = load_json_object_fixture("vesync-devices.json", DOMAIN)
+ALL_DEVICES = load_json_object_fixture("devices.json", DOMAIN)
 ALL_DEVICE_NAMES: list[str] = [
     dev["deviceName"] for dev in ALL_DEVICES["result"]["list"]
 ]
 DEVICE_FIXTURES: dict[str, list[tuple[str, str, str]]] = {
     "Humidifier 6000s": [
-        ("post", "/cloud/v2/deviceManaged/bypassV2", "humidifier-6000s-detail.json")
+        ("post", "/cloud/v2/deviceManaged/bypassV2", "6000s-get-detail.json")
     ],
 }
 
