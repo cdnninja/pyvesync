@@ -8,3 +8,4 @@ pyyaml
 tox
 aiofiles
 pre-commit
+syrupy
