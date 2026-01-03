@@ -21,9 +21,19 @@ class FryerState(DeviceState):
 
     Note: This class is a placeholder for future functionality and does not currently
     implement any specific features or attributes.
+
+    Attributes:
+        _temp_unit (str): Temperature unit of device, defaults to None.
+        cook_status (str): Cooking status of device, defaults to None.
+        current_temp (int): Current temperature of device, defaults to None.
+
     """
 
-    __slots__ = ()
+    __slots__ = (
+        '_temp_unit',
+        'cook_status',
+        'current_temp',
+    )
 
     def __init__(
         self,
@@ -42,6 +52,13 @@ class FryerState(DeviceState):
         super().__init__(device, details, feature_map)
         self.device: VeSyncFryer = device
         self.features: list[str] = feature_map.features
+        self.cook_status: str | None = None
+        self.current_temp: int | None = None
+        self._temp_unit: str | None = None
+
+
+
+
 
 
 class VeSyncFryer(VeSyncBaseDevice):

@@ -74,22 +74,16 @@ class AirFryer158138State(FryerState):
         last_update_ts (int): Last update timestamp of device, defaults to None.
         ready_start (bool): Ready start status of device, defaults to False.
         preheat (bool): Preheat status of device, defaults to False.
-        cook_status (str): Cooking status of device, defaults to None.
-        current_temp (int): Current temperature of device, defaults to None.
         cook_set_temp (int): Cooking set temperature of device, defaults to None.
         last_timestamp (int): Last timestamp of device, defaults to None.
         preheat_set_time (int): Preheat set time of device, defaults to None.
         preheat_last_time (int): Preheat last time of device, defaults to None.
-        _temp_unit (str): Temperature unit of device, defaults to None.
     """
 
     __slots__ = (
-        '_temp_unit',
         'cook_last_time',
         'cook_set_temp',
         'cook_set_time',
-        'cook_status',
-        'current_temp',
         'last_timestamp',
         'max_temp_c',
         'max_temp_f',
@@ -109,23 +103,18 @@ class AirFryer158138State(FryerState):
     ) -> None:
         """Init the Air Fryer 158 class."""
         super().__init__(device, details, feature_map)
-        self.device: VeSyncFryer = device
-        self.features: list[str] = feature_map.features
         self.min_temp_f: int = feature_map.temperature_range_f[0]
         self.max_temp_f: int = feature_map.temperature_range_f[1]
         self.min_temp_c: int = feature_map.temperature_range_c[0]
         self.max_temp_c: int = feature_map.temperature_range_c[1]
         self.ready_start: bool = False
         self.preheat: bool = False
-        self.cook_status: str | None = None
-        self.current_temp: int | None = None
         self.cook_set_temp: int | None = None
         self.cook_set_time: int | None = None
         self.cook_last_time: int | None = None
         self.last_timestamp: int | None = None
         self.preheat_set_time: int | None = None
         self.preheat_last_time: int | None = None
-        self._temp_unit: str | None = None
 
     @property
     def is_resumable(self) -> bool:
